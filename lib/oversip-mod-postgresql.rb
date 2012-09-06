@@ -27,8 +27,11 @@ module OverSIP
 
         # Forcing DB autoreconnect.
         # TODO: It does not work due to a bug: https://github.com/royaltm/ruby-em-pg-client/issues/9
-        # Workaround within the block below.
+        # Workaround below and within the block below.
         #db_data[:async_autoreconnect] = true
+        # Workaround:
+        option_query_timeout = db_data[:query_timeout]
+        option_on_autoreconnect = db_data[:on_autoreconnect]
 
         block = Proc.new  if block_given?
 
@@ -36,7 +39,12 @@ module OverSIP
           log_info "Adding PostgreSQL connection pool (name: #{name.inspect}, size: #{pool_size})..."
           @pools[name] = ::EM::Synchrony::ConnectionPool.new(size: pool_size) do
             conn = ::PG::EM::Client.new(db_data)  #.merge({:async_autoreconnect => true}))
-            conn.async_autoreconnect = true  # NOTE: Workaround for https://github.com/royaltm/ruby-em-pg-client/issues/9.
+
+            # NOTE: Workarounds for https://github.com/royaltm/ruby-em-pg-client/issues/9.
+            conn.async_autoreconnect = true
+            conn.query_timeout = option_query_timeout  if option_query_timeout
+            conn.on_autoreconnect = option_on_autoreconnect  if option_on_autoreconnect
+
             block.call(conn)  if block
             conn
           end
