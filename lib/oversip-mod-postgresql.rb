@@ -26,15 +26,17 @@ module OverSIP
         raise ::ArgumentError, "`options[:pool_size]' must be a positive Fixnum"  unless pool_size.is_a? ::Fixnum and pool_size > 0
 
         # Forcing DB autoreconnect.
-        # TODO: It does not work!
-        db_data[:async_autoreconnect] = true
+        # TODO: It does not work due to a bug: https://github.com/royaltm/ruby-em-pg-client/issues/9
+        # Workaround within the block below.
+        #db_data[:async_autoreconnect] = true
 
         block = Proc.new  if block_given?
 
         OverSIP::SystemCallbacks.on_started do
           log_info "Adding PostgreSQL connection pool (name: #{name.inspect}, size: #{pool_size})..."
           @pools[name] = ::EM::Synchrony::ConnectionPool.new(size: pool_size) do
-            conn = ::PG::EM::Client.new(db_data)
+            conn = ::PG::EM::Client.new(db_data)  #.merge({:async_autoreconnect => true}))
+            conn.async_autoreconnect = true  # NOTE: Workaround for https://github.com/royaltm/ruby-em-pg-client/issues/9.
             block.call(conn)  if block
             conn
           end
