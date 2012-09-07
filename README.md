@@ -14,22 +14,21 @@ Check the [ruby-em-pg-client documentation](https://github.com/royaltm/ruby-em-p
 ## API
 
 
-### Method `OverSIP::Modules::Postgresql.add_pool(options, db_data)`
+### Method `OverSIP::Modules::Postgresql.add_pool(options)`
 
 Creates a PostgreSQL connection pool. Parameters:
 
 * `options`: A mandatory `Hash` with the following fields:
-   * `:name`: Mandatory field. Must be a `Symbol` with the name for this pool.
+   * `:pool_name`: Mandatory field. Must be a `Symbol` with the name for this pool.
    * `:pool_size`: The number of parallel PostgreSQL connections to perform. By default 10.
-
-* `db_data`: A mandatory `Hash` that will be passed to `PG::EM::Client.new` (which inherits from [`PG::Connection`](http://deveiate.org/code/pg/PG/Connection.html)).
+   * The rest of fields will be passed to each `PG::EM::Client.new` being created (which inherits from [`PG::Connection`](http://deveiate.org/code/pg/PG/Connection.html)).
 
 The method allows passing a block which would be later called by passing as argument each generated `PG::EM::Client` instance.
 
 The created connection pool is an instance of [`EventMachine::Synchrony::ConnectionPool`](https://github.com/igrigorik/em-synchrony/blob/master/lib/em-synchrony/connection_pool.rb).
 
 
-### Method `OverSIP::Modules::PostgreSQL.pool(name)`
+### Method `OverSIP::Modules::PostgreSQL.pool(pool_name)`
 
 Retrieves a previously created pool with the given name. Raises an `ArgumentError` if the given name does not exist in the list of created pools.
 
@@ -48,20 +47,14 @@ Within the `OverSIP::SipEvents.on_initialize()` method in `/etc/oversip/server.r
 
 ```
 def (OverSIP::SystemEvents).on_initialize
-  OverSIP::M::Postgresql.add_pool(
-    {
-      :name => :my_db,
-      :pool_size => 5
-    },
-    {
-      :host => "localhost",
-      :user => "oversip",
-      :password => "xxxxxx",
-      :dbname => "oversip"
-    } do |conn|
-      log_info "PostgreSQL created instance: #{conn.inspect}"
-    end
-  )
+  OverSIP::M::Postgresql.add_pool({
+    :pool_name => :my_db,
+    :pool_size => 5,
+    :host => "localhost",
+    :user => "oversip",
+    :password => "xxxxxx",
+    :dbname => "oversip"
+  }) {|conn| log_info "PostgreSQL created instance: #{conn.inspect}" }
 end
 ```
 
