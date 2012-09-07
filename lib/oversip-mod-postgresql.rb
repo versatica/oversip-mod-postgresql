@@ -18,34 +18,25 @@ module OverSIP
       def self.add_pool options
         raise ::ArgumentError, "`options' must be a Hash"  unless options.is_a? ::Hash
 
-        options = options.clone
-
         pool_name = options.delete(:pool_name)
         pool_size = options.delete(:pool_size) || DEFAULT_POOL_SIZE
 
         raise ::ArgumentError, "`options[:pool_name]' must be a Symbol"  unless pool_name.is_a? ::Symbol
         raise ::ArgumentError, "`options[:pool_size]' must be a positive Fixnum"  unless pool_size.is_a? ::Fixnum and pool_size > 0
 
-        # Forcing DB autoreconnect.
-        # TODO: It does not work due to a bug: https://github.com/royaltm/ruby-em-pg-client/issues/9
-        # Workaround below and within the block below.
-        #db_data[:async_autoreconnect] = true
-        # Workaround:
-        option_query_timeout = options[:query_timeout]
-        option_on_autoreconnect = options[:on_autoreconnect]
+        block = ::Proc.new  if block_given?
 
-        block = Proc.new  if block_given?
-
-        OverSIP::SystemCallbacks.on_started do
+        ::OverSIP::SystemCallbacks.on_started do
           log_info "Adding PostgreSQL connection pool (name: #{pool_name.inspect}, size: #{pool_size})..."
           @pools[pool_name] = ::EM::Synchrony::ConnectionPool.new(size: pool_size) do
-            conn = ::PG::EM::Client.new(options)
+            # Avoid the hash to be modified by PG::EM::Client.
+            new_options = options.clone
+            # Force DB autoreconnect.
+            new_options[:async_autoreconnect] = true
 
-            # NOTE: Workarounds for https://github.com/royaltm/ruby-em-pg-client/issues/9.
-            conn.async_autoreconnect = true
-            conn.query_timeout = option_query_timeout  if option_query_timeout
-            conn.on_autoreconnect = option_on_autoreconnect  if option_on_autoreconnect
+            conn = ::PG::EM::Client.new(new_options)
 
+            # Call the given block by passing conn as argument.
             block.call(conn)  if block
             conn
           end
