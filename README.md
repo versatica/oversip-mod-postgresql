@@ -16,12 +16,10 @@ Check the [ruby-em-pg-client documentation](https://github.com/royaltm/ruby-em-p
 
 ### Method `OverSIP::Modules::Postgresql.add_pool(options)`
 
-Creates a PostgreSQL connection pool. Parameters:
-
-* `options`: A mandatory `Hash` with the following fields:
-   * `:pool_name`: Mandatory field. Must be a `Symbol` with the name for this pool.
-   * `:pool_size`: The number of parallel PostgreSQL connections to perform. By default 10.
-   * The rest of fields will be passed to each `PG::EM::Client.new` being created (which inherits from [`PG::Connection`](http://deveiate.org/code/pg/PG/Connection.html)).
+Creates a PostgreSQL connection pool by receiving a mandatory `options` (a `Hash`) with the following fields:
+* `:pool_name`: Mandatory field. Must be a `Symbol` with the name for this pool.
+* `:pool_size`: The number of parallel PostgreSQL connections to perform. By default 10.
+* The rest of fields will be passed to each `PG::EM::Client.new` being created (which inherits from [`PG::Connection`](http://deveiate.org/code/pg/PG/Connection.html)).
 
 The method allows passing a block which would be later called by passing as argument each generated `PG::EM::Client` instance.
 
