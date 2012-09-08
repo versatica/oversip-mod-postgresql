@@ -52,7 +52,7 @@ def (OverSIP::SystemEvents).on_initialize
     :user => "oversip",
     :password => "xxxxxx",
     :dbname => "oversip"
-  }) {|conn| log_info "PostgreSQL created instance: #{conn.inspect}" }
+  }) {|conn| log_info "PostgreSQL created connection: #{conn.inspect}" }
 end
 ```
 
