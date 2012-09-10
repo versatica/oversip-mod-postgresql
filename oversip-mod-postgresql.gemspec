@@ -12,7 +12,7 @@ require "./lib/oversip-mod-postgresql/version"
 
   spec.required_ruby_version = ">= 1.9.2"
   spec.add_dependency "oversip", ">= 1.3.0"
-  spec.add_dependency "em-pg-client", ">= 0.2.0"
+  spec.add_dependency "em-pg-client", ">= 0.2.1"
 
   spec.files = ::Dir.glob %w{
     lib/oversip-mod-postgresql.rb
