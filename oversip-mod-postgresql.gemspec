@@ -11,7 +11,7 @@ require "./lib/oversip-mod-postgresql/version"
   spec.description = "oversip-mod-postgresql provides an easy to use PostgreSQL connector for OverSIP proxy."
 
   spec.required_ruby_version = ">= 1.9.2"
-  spec.add_dependency "oversip", ">= 1.3.0"
+  spec.add_dependency "oversip", ">= 1.3.7"
   spec.add_dependency "em-pg-client", ">= 0.2.1"
 
   spec.files = ::Dir.glob %w{
