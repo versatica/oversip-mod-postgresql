@@ -23,7 +23,7 @@ Creates a PostgreSQL connection pool by receiving a mandatory `options` (a `Hash
 
 The method allows passing a block which would be later called by passing as argument each generated `PG::EM::Client` instance.
 
-The created connection pool is an instance of [`EventMachine::Synchrony::ConnectionPool`](https://github.com/igrigorik/em-synchrony/blob/master/lib/em-synchrony/connection_pool.rb).
+The created connection pool accepts calls to any method defined for `PG::EM::Client` class instance.
 
 
 ### Method `OverSIP::Modules::PostgreSQL.pool(pool_name)`
@@ -83,27 +83,10 @@ rescue ::PG::Error => e
 end
 ```
 
-## Notes
-
-### SQL queries in events others than OverSIP provides
-
-If you want to place a SQL query within an event different than those provided by OverSIP (i.e. within a EventMachine `add_timer` or `next_tick` callback) then you need to create a Fiber and place the SQL query there (otherwise "can't yield from root fiber" error will occur):
-
-```
-EM.add_periodic_timer(2) do
-  Fiber.new do
-    pool = OverSIP::M::Postgresql.pool(:my_db)
-    rows = pool.query "SELECT * FROM users"
-    log_info "online users: #{rows.inspect}"
-  end
-end
-```
-
-
 ## Dependencies
 
 * Ruby > 1.9.2.
-* [oversip](http://www.oversip.net) Gem >= 1.3.0.
+* [oversip](http://www.oversip.net) Gem >= 1.3.7.
 * PostgreSQL development library (the package `libpq-dev` in Debian/Ubuntu).
 
 
